@@ -1,0 +1,572 @@
+definitions:
+  models.Holiday:
+    properties:
+      holidayDate:
+        type: string
+      holidayName:
+        type: string
+      id:
+        type: integer
+    type: object
+  models.Task:
+    properties:
+      estimatedHours:
+        type: integer
+      id:
+        type: integer
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  models.TaskAssignment:
+    properties:
+      endDate:
+        type: string
+      id:
+        type: integer
+      startDate:
+        type: string
+      taskid:
+        type: integer
+      username:
+        type: string
+    type: object
+  models.User:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/user:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with username, name, email, and password
+      parameters:
+      - description: User registration details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "409":
+          description: Username already exists
+          schema:
+            type: string
+      summary: Register a new user
+      tags:
+      - User Management
+  /api/user/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user with username and password
+      parameters:
+      - description: User login credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: User authenticated
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "401":
+          description: User not found / Password doesn't match
+          schema:
+            type: string
+      summary: Login user
+      tags:
+      - User Management
+  /api/v2/holiday:
+    post:
+      consumes:
+      - application/json
+      description: Create a new holiday with provided details
+      parameters:
+      - description: Holiday details
+        in: body
+        name: holiday
+        required: true
+        schema:
+          $ref: '#/definitions/models.Holiday'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Holiday created successfully
+          schema:
+            $ref: '#/definitions/models.Holiday'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "404":
+          description: Holiday already defined
+          schema:
+            type: string
+      summary: Create a new holiday
+      tags:
+      - Holiday Management
+  /api/v2/holiday/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing holiday by its ID
+      parameters:
+      - description: Holiday ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Holiday deleted successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "404":
+          description: Holiday not found
+          schema:
+            type: string
+      summary: Delete a holiday by ID
+      tags:
+      - Holiday Management
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a holiday by its ID
+      parameters:
+      - description: Holiday ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Holiday retrieved successfully
+          schema:
+            $ref: '#/definitions/models.Holiday'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "404":
+          description: Holiday not found
+          schema:
+            type: string
+      summary: Get a holiday by ID
+      tags:
+      - Holiday Management
+    put:
+      consumes:
+      - application/json
+      description: Update an existing holiday by its ID
+      parameters:
+      - description: Holiday ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated holiday details
+        in: body
+        name: holiday
+        required: true
+        schema:
+          $ref: '#/definitions/models.Holiday'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Holiday updated successfully
+          schema:
+            $ref: '#/definitions/models.Holiday'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "404":
+          description: Holiday not found
+          schema:
+            type: string
+      summary: Update a holiday by ID
+      tags:
+      - Holiday Management
+  /api/v2/refreshToken:
+    get:
+      description: Refreshes the authentication token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Token refreshed successfully
+          schema:
+            $ref: '#/definitions/models.User'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Refresh authentication token
+      tags:
+      - User Management
+  /api/v2/task:
+    post:
+      consumes:
+      - application/json
+      description: Create a new task with provided details
+      parameters:
+      - description: Task details
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/models.Task'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Task created successfully
+          schema:
+            $ref: '#/definitions/models.Task'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "409":
+          description: Task with the same title already exists
+          schema:
+            type: string
+      summary: Create a new task
+      tags:
+      - Task Management
+  /api/v2/task/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing task by its ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task deleted successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "404":
+          description: Task not found
+          schema:
+            type: string
+      summary: Delete a task by ID
+      tags:
+      - Task Management
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a task by its ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task retrieved successfully
+          schema:
+            $ref: '#/definitions/models.Task'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "404":
+          description: Task not found
+          schema:
+            type: string
+      summary: Get a task by ID
+      tags:
+      - Task Management
+    put:
+      consumes:
+      - application/json
+      description: Update an existing task by its ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated task details
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/models.Task'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task updated successfully
+          schema:
+            $ref: '#/definitions/models.Task'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "404":
+          description: Task not found
+          schema:
+            type: string
+      summary: Update a task by ID
+      tags:
+      - Task Management
+  /api/v2/taskAssignment:
+    post:
+      consumes:
+      - application/json
+      description: Create a new task assignment with provided details
+      parameters:
+      - description: Task assignment details
+        in: body
+        name: taskAssignment
+        required: true
+        schema:
+          $ref: '#/definitions/models.TaskAssignment'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Task assignment created successfully
+          schema:
+            $ref: '#/definitions/models.TaskAssignment'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "409":
+          description: Username doesn't exist / Task not found / Task is already assigned
+          schema:
+            type: string
+      summary: Create a new task assignment
+      tags:
+      - Task Assignment
+  /api/v2/taskAssignment/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing task assignment by its ID
+      parameters:
+      - description: Task Assignment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task assignment deleted successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "404":
+          description: Task assignment not found
+          schema:
+            type: string
+      summary: Delete a task assignment by ID
+      tags:
+      - Task Assignment
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a task assignment by its ID
+      parameters:
+      - description: Task Assignment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task assignment retrieved successfully
+          schema:
+            $ref: '#/definitions/models.TaskAssignment'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "404":
+          description: Task assignment not found
+          schema:
+            type: string
+      summary: Get a task assignment by ID
+      tags:
+      - Task Assignment
+    put:
+      consumes:
+      - application/json
+      description: Update an existing task assignment by its ID
+      parameters:
+      - description: Task Assignment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated task assignment details
+        in: body
+        name: taskAssignment
+        required: true
+        schema:
+          $ref: '#/definitions/models.TaskAssignment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task assignment updated successfully
+          schema:
+            $ref: '#/definitions/models.TaskAssignment'
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "404":
+          description: Username doesn't exist / Task not found / Task assignment not
+            found
+          schema:
+            type: string
+      summary: Update a task assignment by ID
+      tags:
+      - Task Assignment
+  /api/v2/user:
+    delete:
+      description: Deletes the account of the authenticated user
+      parameters:
+      - description: User deletion request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Username doesn't exist
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Delete user account
+      tags:
+      - User Management
+    put:
+      consumes:
+      - application/json
+      description: Updates the password of the authenticated user
+      parameters:
+      - description: Update Password Request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Password updated successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid request payload
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Username doesn't exist
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      - ApiKeyAuth: []
+      summary: Update user password
+      tags:
+      - User Management
+securityDefinitions:
+  Bearer:
+    description: This is a sample API for managing tasks.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
