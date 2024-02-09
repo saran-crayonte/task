@@ -9,7 +9,11 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "name": "Saran",
+            "url": "github.com/saran-crayonte/",
+            "email": "saran.kumaresan@crayonte.com"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -109,6 +113,11 @@ const docTemplate = `{
         },
         "/api/v2/holiday": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new holiday with provided details",
                 "consumes": [
                     "application/json"
@@ -121,6 +130,13 @@ const docTemplate = `{
                 ],
                 "summary": "Create a new holiday",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "Holiday details",
                         "name": "holiday",
@@ -155,6 +171,11 @@ const docTemplate = `{
         },
         "/api/v2/holiday/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieve a holiday by its ID",
                 "consumes": [
                     "application/json"
@@ -167,6 +188,13 @@ const docTemplate = `{
                 ],
                 "summary": "Get a holiday by ID",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Holiday ID",
@@ -197,6 +225,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update an existing holiday by its ID",
                 "consumes": [
                     "application/json"
@@ -209,6 +242,13 @@ const docTemplate = `{
                 ],
                 "summary": "Update a holiday by ID",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Holiday ID",
@@ -248,6 +288,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete an existing holiday by its ID",
                 "consumes": [
                     "application/json"
@@ -260,6 +305,13 @@ const docTemplate = `{
                 ],
                 "summary": "Delete a holiday by ID",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Holiday ID",
@@ -305,6 +357,22 @@ const docTemplate = `{
                     "User Management"
                 ],
                 "summary": "Refresh authentication token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Enter username",
+                        "name": "username",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Token refreshed successfully",
@@ -323,6 +391,11 @@ const docTemplate = `{
         },
         "/api/v2/task": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new task with provided details",
                 "consumes": [
                     "application/json"
@@ -335,6 +408,13 @@ const docTemplate = `{
                 ],
                 "summary": "Create a new task",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "Task details",
                         "name": "task",
@@ -369,6 +449,11 @@ const docTemplate = `{
         },
         "/api/v2/task/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieve a task by its ID",
                 "consumes": [
                     "application/json"
@@ -381,6 +466,13 @@ const docTemplate = `{
                 ],
                 "summary": "Get a task by ID",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Task ID",
@@ -411,6 +503,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update an existing task by its ID",
                 "consumes": [
                     "application/json"
@@ -423,6 +520,13 @@ const docTemplate = `{
                 ],
                 "summary": "Update a task by ID",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Task ID",
@@ -462,6 +566,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete an existing task by its ID",
                 "consumes": [
                     "application/json"
@@ -474,6 +583,13 @@ const docTemplate = `{
                 ],
                 "summary": "Delete a task by ID",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Task ID",
@@ -506,6 +622,11 @@ const docTemplate = `{
         },
         "/api/v2/taskAssignment": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new task assignment with provided details",
                 "consumes": [
                     "application/json"
@@ -518,6 +639,13 @@ const docTemplate = `{
                 ],
                 "summary": "Create a new task assignment",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "Task assignment details",
                         "name": "taskAssignment",
@@ -552,6 +680,11 @@ const docTemplate = `{
         },
         "/api/v2/taskAssignment/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieve a task assignment by its ID",
                 "consumes": [
                     "application/json"
@@ -564,6 +697,13 @@ const docTemplate = `{
                 ],
                 "summary": "Get a task assignment by ID",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Task Assignment ID",
@@ -594,6 +734,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update an existing task assignment by its ID",
                 "consumes": [
                     "application/json"
@@ -606,6 +751,13 @@ const docTemplate = `{
                 ],
                 "summary": "Update a task assignment by ID",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Task Assignment ID",
@@ -645,6 +797,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete an existing task assignment by its ID",
                 "consumes": [
                     "application/json"
@@ -657,6 +814,13 @@ const docTemplate = `{
                 ],
                 "summary": "Delete a task assignment by ID",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Task Assignment ID",
@@ -691,9 +855,6 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "BearerAuth": []
-                    },
-                    {
                         "ApiKeyAuth": []
                     }
                 ],
@@ -709,6 +870,13 @@ const docTemplate = `{
                 ],
                 "summary": "Update user password",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "Update Password Request",
                         "name": "user",
@@ -761,6 +929,13 @@ const docTemplate = `{
                 ],
                 "summary": "Delete user account",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "User deletion request",
                         "name": "user",
@@ -875,25 +1050,17 @@ const docTemplate = `{
                 }
             }
         }
-    },
-    "securityDefinitions": {
-        "Bearer": {
-            "description": "This is a sample API for managing tasks.",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
-        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
+	Version:          "1.0",
+	Host:             "localhost:8080",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Task Management API",
+	Description:      "This is a sample API for managing tasks.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

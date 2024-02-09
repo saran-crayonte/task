@@ -15,6 +15,10 @@ import (
 //	@Tags			Task Management
 //	@Accept			json
 //	@Produce		json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param			task	body		models.Task	true	"Task details"
 //	@Success		201		{object}	models.Task	"Task created successfully"
 //	@Failure		400		{object}	string		"Invalid request payload"
@@ -45,6 +49,10 @@ func CreateTasks() fiber.Handler {
 //	@Tags			Task Management
 //	@Accept			json
 //	@Produce		json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param			id	path		int			true	"Task ID"
 //	@Success		200	{object}	models.Task	"Task retrieved successfully"
 //	@Failure		400	{object}	string		"Invalid request payload"
@@ -72,6 +80,10 @@ func GetTasks() fiber.Handler {
 //	@Tags			Task Management
 //	@Accept			json
 //	@Produce		json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param			id		path		int			true	"Task ID"
 //	@Param			task	body		models.Task	true	"Updated task details"
 //	@Success		200		{object}	models.Task	"Task updated successfully"
@@ -103,6 +115,10 @@ func UpdateTasks() fiber.Handler {
 //	@Tags			Task Management
 //	@Accept			json
 //	@Produce		json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param			id	path		int		true	"Task ID"
 //	@Success		200	{object}	string	"Task deleted successfully"
 //	@Failure		400	{object}	string	"Invalid request payload"

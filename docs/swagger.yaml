@@ -43,8 +43,15 @@ definitions:
       username:
         type: string
     type: object
+host: localhost:8080
 info:
-  contact: {}
+  contact:
+    email: saran.kumaresan@crayonte.com
+    name: Saran
+    url: github.com/saran-crayonte/
+  description: This is a sample API for managing tasks.
+  title: Task Management API
+  version: "1.0"
 paths:
   /api/user:
     post:
@@ -112,6 +119,11 @@ paths:
       - application/json
       description: Create a new holiday with provided details
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Holiday details
         in: body
         name: holiday
@@ -133,6 +145,8 @@ paths:
           description: Holiday already defined
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Create a new holiday
       tags:
       - Holiday Management
@@ -142,6 +156,11 @@ paths:
       - application/json
       description: Delete an existing holiday by its ID
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Holiday ID
         in: path
         name: id
@@ -162,6 +181,8 @@ paths:
           description: Holiday not found
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Delete a holiday by ID
       tags:
       - Holiday Management
@@ -170,6 +191,11 @@ paths:
       - application/json
       description: Retrieve a holiday by its ID
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Holiday ID
         in: path
         name: id
@@ -190,6 +216,8 @@ paths:
           description: Holiday not found
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Get a holiday by ID
       tags:
       - Holiday Management
@@ -198,6 +226,11 @@ paths:
       - application/json
       description: Update an existing holiday by its ID
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Holiday ID
         in: path
         name: id
@@ -224,12 +257,25 @@ paths:
           description: Holiday not found
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Update a holiday by ID
       tags:
       - Holiday Management
   /api/v2/refreshToken:
     get:
       description: Refreshes the authentication token
+      parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Enter username
+        in: header
+        name: username
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -252,6 +298,11 @@ paths:
       - application/json
       description: Create a new task with provided details
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Task details
         in: body
         name: task
@@ -273,6 +324,8 @@ paths:
           description: Task with the same title already exists
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Create a new task
       tags:
       - Task Management
@@ -282,6 +335,11 @@ paths:
       - application/json
       description: Delete an existing task by its ID
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Task ID
         in: path
         name: id
@@ -302,6 +360,8 @@ paths:
           description: Task not found
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Delete a task by ID
       tags:
       - Task Management
@@ -310,6 +370,11 @@ paths:
       - application/json
       description: Retrieve a task by its ID
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Task ID
         in: path
         name: id
@@ -330,6 +395,8 @@ paths:
           description: Task not found
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Get a task by ID
       tags:
       - Task Management
@@ -338,6 +405,11 @@ paths:
       - application/json
       description: Update an existing task by its ID
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Task ID
         in: path
         name: id
@@ -364,6 +436,8 @@ paths:
           description: Task not found
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Update a task by ID
       tags:
       - Task Management
@@ -373,6 +447,11 @@ paths:
       - application/json
       description: Create a new task assignment with provided details
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Task assignment details
         in: body
         name: taskAssignment
@@ -394,6 +473,8 @@ paths:
           description: Username doesn't exist / Task not found / Task is already assigned
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Create a new task assignment
       tags:
       - Task Assignment
@@ -403,6 +484,11 @@ paths:
       - application/json
       description: Delete an existing task assignment by its ID
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Task Assignment ID
         in: path
         name: id
@@ -423,6 +509,8 @@ paths:
           description: Task assignment not found
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Delete a task assignment by ID
       tags:
       - Task Assignment
@@ -431,6 +519,11 @@ paths:
       - application/json
       description: Retrieve a task assignment by its ID
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Task Assignment ID
         in: path
         name: id
@@ -451,6 +544,8 @@ paths:
           description: Task assignment not found
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Get a task assignment by ID
       tags:
       - Task Assignment
@@ -459,6 +554,11 @@ paths:
       - application/json
       description: Update an existing task assignment by its ID
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Task Assignment ID
         in: path
         name: id
@@ -486,6 +586,8 @@ paths:
             found
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Update a task assignment by ID
       tags:
       - Task Assignment
@@ -493,6 +595,11 @@ paths:
     delete:
       description: Deletes the account of the authenticated user
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: User deletion request
         in: body
         name: user
@@ -532,6 +639,11 @@ paths:
       - application/json
       description: Updates the password of the authenticated user
       parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
       - description: Update Password Request
         in: body
         name: user
@@ -558,15 +670,8 @@ paths:
           schema:
             type: string
       security:
-      - BearerAuth: []
       - ApiKeyAuth: []
       summary: Update user password
       tags:
       - User Management
-securityDefinitions:
-  Bearer:
-    description: This is a sample API for managing tasks.
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"

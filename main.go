@@ -10,17 +10,13 @@ import (
 	"github.com/saran-crayonte/task/routes"
 )
 
-// @securityDefinitions.apikey Bearer
-// @in header
-// @name Authorization
-//
-//	@title			Task Management API
-//	@Description	This is a sample API for managing tasks.
-//	@version		1.0
-//	@contact.name	Saran
-//	@contact.url	github.com/saran-crayonte/
-//	@contact.email	saran.kumaresan@crayonte.com
-//	@host	localhost:8080
+// @title			Task Management API
+// @Description	This is a sample API for managing tasks.
+// @version		1.0
+// @contact.name	Saran
+// @contact.url	github.com/saran-crayonte/
+// @contact.email	saran.kumaresan@crayonte.com
+// @host	localhost:8080
 func main() {
 	app := fiber.New()
 	app.Get("/swagger/*", swagger.HandlerDefault)

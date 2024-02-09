@@ -10,11 +10,16 @@ import (
 )
 
 // CreateTaskAssignment handles creating a new task assignment
+//
 //	@Summary		Create a new task assignment
 //	@Description	Create a new task assignment with provided details
 //	@Tags			Task Assignment
 //	@Accept			json
 //	@Produce		json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param			taskAssignment	body		models.TaskAssignment	true	"Task assignment details"
 //	@Success		201				{object}	models.TaskAssignment	"Task assignment created successfully"
 //	@Failure		400				{object}	string					"Invalid request payload"
@@ -99,11 +104,16 @@ func isHoliday(date time.Time) bool {
 }
 
 // GetTaskAssignment handles retrieving a task assignment by ID
+//
 //	@Summary		Get a task assignment by ID
 //	@Description	Retrieve a task assignment by its ID
 //	@Tags			Task Assignment
 //	@Accept			json
 //	@Produce		json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param			id	path		int						true	"Task Assignment ID"
 //	@Success		200	{object}	models.TaskAssignment	"Task assignment retrieved successfully"
 //	@Failure		400	{object}	string					"Invalid request payload"
@@ -125,11 +135,16 @@ func GetTaskAssignment() fiber.Handler {
 }
 
 // UpdateTaskAssignment handles updating a task assignment by ID
+//
 //	@Summary		Update a task assignment by ID
 //	@Description	Update an existing task assignment by its ID
 //	@Tags			Task Assignment
 //	@Accept			json
 //	@Produce		json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param			id				path		int						true	"Task Assignment ID"
 //	@Param			taskAssignment	body		models.TaskAssignment	true	"Updated task assignment details"
 //	@Success		200				{object}	models.TaskAssignment	"Task assignment updated successfully"
@@ -182,11 +197,16 @@ func UpdateTaskAssignment() fiber.Handler {
 }
 
 // DeleteTaskAssignment handles deleting a task assignment by ID
+//
 //	@Summary		Delete a task assignment by ID
 //	@Description	Delete an existing task assignment by its ID
 //	@Tags			Task Assignment
 //	@Accept			json
 //	@Produce		json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param			id	path		int		true	"Task Assignment ID"
 //	@Success		200	{object}	string	"Task assignment deleted successfully"
 //	@Failure		400	{object}	string	"Invalid request payload"

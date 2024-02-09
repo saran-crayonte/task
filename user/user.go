@@ -116,11 +116,11 @@ func Login() fiber.Handler {
 //	@Summary		Update user password
 //	@Description	Updates the password of the authenticated user
 //	@Tags			User Management
-//	@Security		BearerAuth
 //	@Accept			json
 //	@Produce		json
 //
-//	@Security		ApiKeyAuth
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
 //
 //	@Param			user	body		models.User	true	"Update Password Request"
 //	@Success		202		{object}	string		"Password updated successfully"
@@ -169,8 +169,11 @@ func UpdatePassword() fiber.Handler {
 //	@Summary		Delete user account
 //	@Description	Deletes the account of the authenticated user
 //	@Tags			User Management
-//	@Security		ApiKeyAuth
 //	@Produce	json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param		user	body		models.User	true	"User deletion request"
 //	@Success	200		{object}	string		"User deleted successfully"
 //	@Failure	400		{object}	string		"Invalid request payload"
@@ -289,7 +292,9 @@ func Authenticate() fiber.Handler {
 //	@Description	Refreshes the authentication token
 //	@Tags			User Management
 //
-//	@Security		ApiKeyAuth
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+// @Param username header string true "Enter username"
 //
 //	@Produce		json
 //	@Success		200	{object}	models.User	"Token refreshed successfully"
@@ -307,6 +312,13 @@ func RefreshToken() fiber.Handler {
 			log.Println("Username key not found.")
 
 			returnObject["msg"] = "username not found."
+			return c.Status(fiber.StatusUnauthorized).JSON(returnObject)
+		}
+
+		tokenUsername := c.Locals("username")
+		if username != tokenUsername {
+			log.Println("username and token username mismatch.")
+			returnObject["msg"] = "Invalid username."
 			return c.Status(fiber.StatusUnauthorized).JSON(returnObject)
 		}
 

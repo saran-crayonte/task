@@ -15,6 +15,10 @@ import (
 //	@Tags			Holiday Management
 //	@Accept			json
 //	@Produce		json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param			holiday	body		models.Holiday	true	"Holiday details"
 //	@Success		201		{object}	models.Holiday	"Holiday created successfully"
 //	@Failure		400		{object}	string			"Invalid request payload"
@@ -43,6 +47,10 @@ func CreateHoliday() fiber.Handler {
 //	@Tags			Holiday Management
 //	@Accept			json
 //	@Produce		json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param			id	path		int				true	"Holiday ID"
 //	@Success		200	{object}	models.Holiday	"Holiday retrieved successfully"
 //	@Failure		400	{object}	string			"Invalid request payload"
@@ -70,6 +78,10 @@ func GetHoliday() fiber.Handler {
 //	@Tags			Holiday Management
 //	@Accept			json
 //	@Produce		json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param			id		path		int				true	"Holiday ID"
 //	@Param			holiday	body		models.Holiday	true	"Updated holiday details"
 //	@Success		200		{object}	models.Holiday	"Holiday updated successfully"
@@ -99,6 +111,10 @@ func UpdateHoliday() fiber.Handler {
 //	@Tags			Holiday Management
 //	@Accept			json
 //	@Produce		json
+//
+// @Security ApiKeyAuth
+// @Param token header string true "API Key"
+//
 //	@Param			id	path		int		true	"Holiday ID"
 //	@Success		200	{object}	string	"Holiday deleted successfully"
 //	@Failure		400	{object}	string	"Invalid request payload"
