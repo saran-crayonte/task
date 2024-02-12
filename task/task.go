@@ -39,8 +39,19 @@ func CreateTasks() fiber.Handler {
 		// }
 
 		database.DB.Create(&task)
-		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-			"message": "Task Created successfully",
+		type UserResponse struct {
+			Message        string `json:"message"`
+			TaskID         string `json:"taskID"`
+			Title          string `json:"title"`
+			Status         string `json:"status"`
+			EstimatedHours string `json:"estimatedHours"`
+		}
+		return c.Status(fiber.StatusCreated).JSON(UserResponse{
+			Message:        "Task Created successfully",
+			TaskID:         string(rune(task.ID)),
+			Title:          task.Title,
+			Status:         task.Status,
+			EstimatedHours: string(rune(task.EstimatedHours)),
 		})
 	}
 }
@@ -113,7 +124,7 @@ func UpdateTasks() fiber.Handler {
 		// if existingTask.ID != 0 {
 		// 	return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Task with the same title already exists"})
 		// }
-		updatesInTaskAssignment(task.ID, existingTask.EstimatedHours)
+		UpdatesInTaskAssignment(task.ID, task.EstimatedHours)
 		database.DB.Model(&existingTask).Updates(task)
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"message": "Task updated successfully",
@@ -121,7 +132,7 @@ func UpdateTasks() fiber.Handler {
 	}
 }
 
-func updatesInTaskAssignment(id uint, est int) {
+func UpdatesInTaskAssignment(id uint, est int) {
 	taskAssign := new(models.TaskAssignment)
 	database.DB.Where("task_id=?", id).First(&taskAssign)
 	if taskAssign.ID != 0 {
@@ -179,4 +190,25 @@ func DeleteTasks() fiber.Handler {
 func deleteInTaskAssignment(ID int) {
 	taskAssignment := new(models.TaskAssignment)
 	database.DB.Where("task_id=?", ID).Delete(&taskAssignment)
+}
+
+// DisplayAllTasks handles retrieving all tasks
+//
+//	@Summary		Get all task
+//	@Description	Retrieve all task
+//	@Tags			Task Management
+//	@Accept			json
+//	@Produce		json
+//
+//	@Security		ApiKeyAuth
+//	@Param			token	header		string		true	"API Key"
+//
+//	@Success		200		{object}	models.Task	"Task retrieved successfully"
+//	@Router			/api/v2/holiday [get]
+func DisplayAllTasks() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var task []models.Task
+		database.DB.Find(&task)
+		return c.Status(fiber.StatusOK).JSON(task)
+	}
 }

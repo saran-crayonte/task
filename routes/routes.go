@@ -19,24 +19,28 @@ func SetupRoutes(app *fiber.App) {
 
 	// Authenticated API routes
 	api := ap.Group("/v2", user.Authenticate())
+	api.Get("/alluser", user.DisplayAllUsers())
 	api.Get("/refreshToken", user.RefreshToken())
 	api.Put("/user", user.UpdatePassword())
 	api.Delete("/user", user.DeleteUser())
 
 	// Task routes
 	api.Post("/task", task.CreateTasks())
+	api.Get("/task", task.DisplayAllTasks())
 	api.Get("/task/:id", task.GetTasks())
 	api.Put("/task/:id", task.UpdateTasks())
 	api.Delete("/task/:id", task.DeleteTasks())
 
 	// Task assignment routes
 	api.Post("/taskAssignment", taskAssignment.CreateTaskAssignment())
+	api.Get("/taskAssignment", taskAssignment.DisplayAllTaskAssignments())
 	api.Get("/taskAssignment/:id", taskAssignment.GetTaskAssignment())
 	api.Put("/taskAssignment/:id", taskAssignment.UpdateTaskAssignment())
 	api.Delete("/taskAssignment/:id", taskAssignment.DeleteTaskAssignment())
 
 	// Holiday routes
 	api.Post("/holiday", holiday.CreateHoliday())
+	api.Get("/holiday", holiday.DisplayAllHolidays())
 	api.Get("/holiday/:id", holiday.GetHoliday())
 	api.Put("/holiday/:id", holiday.UpdateHoliday())
 	api.Delete("/holiday/:id", holiday.DeleteHoliday())

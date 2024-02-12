@@ -90,7 +90,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "202": {
+                    "200": {
                         "description": "User authenticated",
                         "schema": {
                             "$ref": "#/definitions/models.User"
@@ -111,7 +111,79 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v2/alluser": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve all users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Get all users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.Task"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v2/holiday": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve all task",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Task Management"
+                ],
+                "summary": "Get all task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Task retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.Task"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -385,6 +457,41 @@ const docTemplate = `{
             }
         },
         "/api/v2/task": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve all holidays",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Holiday Management"
+                ],
+                "summary": "Get all holidays",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Holiday retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.Holiday"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -603,6 +710,41 @@ const docTemplate = `{
             }
         },
         "/api/v2/taskAssignment": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve all task assignments",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Task Assignment"
+                ],
+                "summary": "Get all task assignments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Task Assignment retrieved successfully",
+                        "schema": {
+                            "$ref": "#/definitions/models.TaskAssignment"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -863,7 +1005,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "202": {
+                    "200": {
                         "description": "Password updated successfully",
                         "schema": {
                             "type": "string"

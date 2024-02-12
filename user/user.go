@@ -53,8 +53,18 @@ func Register() fiber.Handler {
 		}
 		database.DB.Create(&newUser)
 
-		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-			"message": "User registered successfully",
+		type UserResponse struct {
+			Message  string `json:"message"`
+			Username string `json:"username"`
+			Name     string `json:"name"`
+			Email    string `json:"email"`
+		}
+
+		return c.Status(fiber.StatusCreated).JSON(UserResponse{
+			Message:  "User registered successfully",
+			Username: newUser.Username,
+			Name:     newUser.Name,
+			Email:    newUser.Email,
 		})
 	}
 }
@@ -67,7 +77,7 @@ func Register() fiber.Handler {
 //	@Accept			json
 //	@Produce		json
 //	@Param			user	body		models.User	true	"User login credentials"
-//	@Success		202		{object}	models.User	"User authenticated"
+//	@Success		200		{object}	models.User	"User authenticated"
 //	@Failure		400		{object}	string		"Invalid request payload"
 //	@Failure		401		{object}	string		"User not found / Password doesn't match"
 //	@Router			/api/user/login [post]
@@ -101,11 +111,19 @@ func Login() fiber.Handler {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Token creation error"})
 		}
 
-		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
-			"token":   token,
-			"user":    user,
-			"status":  "OK",
-			"message": "User Authenticated",
+		type UserResponse struct {
+			Message  string `json:"message"`
+			Token    string `json:"token"`
+			Username string `json:"username"`
+			Name     string `json:"name"`
+			Email    string `json:"email"`
+		}
+		return c.Status(fiber.StatusOK).JSON(UserResponse{
+			Message:  "User Authenticated",
+			Token:    token,
+			Username: user.Username,
+			Name:     user.Name,
+			Email:    user.Email,
 		})
 	}
 }
@@ -122,7 +140,7 @@ func Login() fiber.Handler {
 //	@Param			token	header		string		true	"API Key"
 //
 //	@Param			user	body		models.User	true	"Update Password Request"
-//	@Success		202		{object}	string		"Password updated successfully"
+//	@Success		200		{object}	string		"Password updated successfully"
 //	@Failure		400		{object}	string		"Invalid request payload"
 //	@Failure		401		{object}	string		"Unauthorized"
 //	@Failure		404		{object}	string		"Username doesn't exist"
@@ -165,7 +183,7 @@ func UpdatePassword() fiber.Handler {
 		b.Password = string(hashedPassword)
 		database.DB.Model(&existingUser).Updates(b)
 
-		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"message": "Password updated successfully",
 		})
 	}
@@ -299,7 +317,6 @@ func Authenticate() fiber.Handler {
 		if msg != "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": msg})
 		}
-
 		c.Locals("username", claims.Username)
 
 		return c.Next()
@@ -352,10 +369,39 @@ func RefreshToken() fiber.Handler {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Token creation error."})
 		}
 
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"token":  token,
-			"user":   user,
-			"status": "Ok",
+		type UserResponse struct {
+			Token    string `json:"token"`
+			Username string `json:"username"`
+			Name     string `json:"name"`
+			Email    string `json:"email"`
+		}
+
+		return c.Status(fiber.StatusOK).JSON(UserResponse{
+			Token:    token,
+			Username: user.Username,
+			Name:     user.Name,
+			Email:    user.Email,
 		})
+	}
+}
+
+// DisplayAllUsers handles retrieving all users
+//
+//	@Summary		Get all users
+//	@Description	Retrieve all users
+//	@Tags			User Management
+//	@Accept			json
+//	@Produce		json
+//
+//	@Security		ApiKeyAuth
+//	@Param			token	header		string		true	"API Key"
+//
+//	@Success		200		{object}	models.Task	"User retrieved successfully"
+//	@Router			/api/v2/alluser [get]
+func DisplayAllUsers() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var user []models.User
+		database.DB.Select("username, name, email").Find(&user)
+		return c.Status(fiber.StatusOK).JSON(user)
 	}
 }

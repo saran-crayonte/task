@@ -98,7 +98,7 @@ paths:
       produces:
       - application/json
       responses:
-        "202":
+        "200":
           description: User authenticated
           schema:
             $ref: '#/definitions/models.User'
@@ -113,7 +113,52 @@ paths:
       summary: Login user
       tags:
       - User Management
+  /api/v2/alluser:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all users
+      parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User retrieved successfully
+          schema:
+            $ref: '#/definitions/models.Task'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all users
+      tags:
+      - User Management
   /api/v2/holiday:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all task
+      parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task retrieved successfully
+          schema:
+            $ref: '#/definitions/models.Task'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all task
+      tags:
+      - Task Management
     post:
       consumes:
       - application/json
@@ -289,6 +334,28 @@ paths:
       tags:
       - User Management
   /api/v2/task:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all holidays
+      parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Holiday retrieved successfully
+          schema:
+            $ref: '#/definitions/models.Holiday'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all holidays
+      tags:
+      - Holiday Management
     post:
       consumes:
       - application/json
@@ -429,6 +496,28 @@ paths:
       tags:
       - Task Management
   /api/v2/taskAssignment:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all task assignments
+      parameters:
+      - description: API Key
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task Assignment retrieved successfully
+          schema:
+            $ref: '#/definitions/models.TaskAssignment'
+      security:
+      - ApiKeyAuth: []
+      summary: Get all task assignments
+      tags:
+      - Task Assignment
     post:
       consumes:
       - application/json
@@ -635,7 +724,7 @@ paths:
       produces:
       - application/json
       responses:
-        "202":
+        "200":
           description: Password updated successfully
           schema:
             type: string

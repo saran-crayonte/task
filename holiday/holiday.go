@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/saran-crayonte/task/database"
 	"github.com/saran-crayonte/task/models"
+	"github.com/saran-crayonte/task/task"
 )
 
 // CreateHoliday handles creating a new holiday
@@ -42,7 +43,19 @@ func CreateHoliday() fiber.Handler {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Holiday already defined"})
 		}
 		database.DB.Create(&holiday)
-		return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Holiday created successfully"})
+		UpdateHolidayInAssignment()
+		type UserResponse struct {
+			Message     string `json:"message"`
+			HolidayID   string `json:"holidayID"`
+			HolidayName string `json:"holidayName"`
+			HolidayDate string `json:"holidayDate"`
+		}
+		return c.Status(fiber.StatusCreated).JSON(UserResponse{
+			Message:     "Holiday created successfully",
+			HolidayID:   string(rune(holiday.ID)),
+			HolidayName: holiday.HolidayName,
+			HolidayDate: holiday.HolidayDate,
+		})
 	}
 }
 
@@ -114,10 +127,11 @@ func UpdateHoliday() fiber.Handler {
 		}
 		var existingHoliday models.Holiday
 		database.DB.Where("holiday_date=?", holiday.HolidayDate).First(&existingHoliday)
-		if existingHoliday.ID != 0 {
+		if existingHoliday.ID != 0 && existingHoliday.ID != holiday.ID {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Holiday already defined"})
 		}
 		database.DB.Model(&newHoliday).Updates(holiday)
+		UpdateHolidayInAssignment()
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Holiday Updated Successfully"})
 	}
 }
@@ -153,8 +167,42 @@ func DeleteHoliday() fiber.Handler {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Holiday not found"})
 		}
 		database.DB.Delete(&newHoliday)
+		UpdateHolidayInAssignment()
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"message": "Holiday deleted successfully",
 		})
+	}
+}
+
+func UpdateHolidayInAssignment() {
+	var taskAssignments []models.TaskAssignment
+	database.DB.Find(&taskAssignments)
+	for _, taskAssignment := range taskAssignments {
+		var findTask models.Task
+		database.DB.Where("id=?", taskAssignment.TaskID).First(&findTask)
+		if findTask.ID != 0 {
+			task.UpdatesInTaskAssignment(findTask.ID, findTask.EstimatedHours)
+		}
+	}
+}
+
+// DisplayAllHolidays handles retrieving all holidays
+//
+//	@Summary		Get all holidays
+//	@Description	Retrieve all holidays
+//	@Tags			Holiday Management
+//	@Accept			json
+//	@Produce		json
+//
+//	@Security		ApiKeyAuth
+//	@Param			token	header		string			true	"API Key"
+//
+//	@Success		200		{object}	models.Holiday	"Holiday retrieved successfully"
+//	@Router			/api/v2/task [get]
+func DisplayAllHolidays() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var holiday []models.Holiday
+		database.DB.Find(&holiday)
+		return c.Status(fiber.StatusOK).JSON(holiday)
 	}
 }

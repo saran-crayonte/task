@@ -60,8 +60,21 @@ func CreateTaskAssignment() fiber.Handler {
 		taskAssignment.Start_Date = startDate.Format("2006-01-02 3:04 PM")
 		taskAssignment.End_Date = result.Format("2006-01-02 3:04 PM")
 		database.DB.Create(taskAssignment)
-		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-			"message": "Task Assignment created successfully",
+		type UserResponse struct {
+			Message      string `json:"message"`
+			AssignmentID string `json:"TaskAssignmentID"`
+			Username     string `json:"username"`
+			TaskID       string `json:"taskID"`
+			StartDate    string `json:"startDate"`
+			EndDate      string `json:"EndDate"`
+		}
+		return c.Status(fiber.StatusCreated).JSON(UserResponse{
+			Message:      "Task Assignment created successfully",
+			AssignmentID: string(rune(taskAssignment.ID)),
+			Username:     taskAssignment.Username,
+			TaskID:       string(rune(taskAssignment.TaskID)),
+			StartDate:    taskAssignment.Start_Date,
+			EndDate:      taskAssignment.End_Date,
 		})
 	}
 }
@@ -235,5 +248,26 @@ func DeleteTaskAssignment() fiber.Handler {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"message": "Task Assignment entry deleted successfully",
 		})
+	}
+}
+
+// DisplayAllTaskAssignments handles retrieving all task assignments
+//
+//	@Summary		Get all task assignments
+//	@Description	Retrieve all task assignments
+//	@Tags			Task Assignment
+//	@Accept			json
+//	@Produce		json
+//
+//	@Security		ApiKeyAuth
+//	@Param			token	header		string					true	"API Key"
+//
+//	@Success		200		{object}	models.TaskAssignment	"Task Assignment retrieved successfully"
+//	@Router			/api/v2/taskAssignment [get]
+func DisplayAllTaskAssignments() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var taskAssignment []models.TaskAssignment
+		database.DB.Find(&taskAssignment)
+		return c.Status(fiber.StatusOK).JSON(taskAssignment)
 	}
 }
