@@ -17,11 +17,11 @@ import (
 //	@Accept			json
 //	@Produce		json
 //
-// @Security ApiKeyAuth
-// @Param token header string true "API Key"
+//	@Security		ApiKeyAuth
+//	@Param			token			header		string					true	"API Key"
 //
 //	@Param			taskAssignment	body		models.TaskAssignment	true	"Task assignment details"
-//	@Success		201				{object}	models.TaskAssignment	"Task assignment created successfully"
+//	@Success		201				{object}	string					"Task assignment created successfully"
 //	@Failure		400				{object}	string					"Invalid request payload"
 //	@Failure		409				{object}	string					"Username doesn't exist / Task not found / Task is already assigned"
 //	@Router			/api/v2/taskAssignment [post]
@@ -31,22 +31,23 @@ func CreateTaskAssignment() fiber.Handler {
 		if err := json.Unmarshal(c.Body(), &taskAssignment); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
+
+		var checkAlreadyAssigned models.TaskAssignment
+		database.DB.Where("task_id=?", taskAssignment.TaskID).First(&checkAlreadyAssigned)
+		if checkAlreadyAssigned.ID != 0 {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task is already assigned to somebody"})
+		}
+
 		var existingUser models.User
-		database.DB.First(&existingUser, "username = ?", taskAssignment.Username)
+		database.DB.Where("username=?", taskAssignment.Username).First(&existingUser)
 		if len(existingUser.Username) == 0 {
 			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Username doesn't exists"})
 		}
 
 		var existingTask models.Task
-		database.DB.First(&existingTask, taskAssignment.TaskID)
+		database.DB.Where("id=?", taskAssignment.TaskID).First(&existingTask)
 		if existingTask.ID == 0 {
 			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Task not found"})
-		}
-
-		var checkAlreadyAssigned models.TaskAssignment
-		database.DB.First(&checkAlreadyAssigned, taskAssignment.TaskID)
-		if checkAlreadyAssigned.ID != 0 {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task is already assigned to somebody"})
 		}
 
 		estimatedHours := existingTask.EstimatedHours
@@ -55,15 +56,17 @@ func CreateTaskAssignment() fiber.Handler {
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid date time format"})
 		}
-		result := calculateEndDate(startDate, estimatedHours)
+		result := CalculateEndDate(startDate, estimatedHours)
 		taskAssignment.Start_Date = startDate.Format("2006-01-02 3:04 PM")
 		taskAssignment.End_Date = result.Format("2006-01-02 3:04 PM")
 		database.DB.Create(taskAssignment)
-		return c.Status(fiber.StatusCreated).JSON(taskAssignment)
+		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+			"message": "Task Assignment created successfully",
+		})
 	}
 }
 
-func calculateEndDate(startDate time.Time, estimatedHours int) time.Time {
+func CalculateEndDate(startDate time.Time, estimatedHours int) time.Time {
 	//workingHoursPerDay := 8
 	endDate := startDate
 	remainingHours := estimatedHours
@@ -97,10 +100,8 @@ func calculateEndDate(startDate time.Time, estimatedHours int) time.Time {
 }
 func isHoliday(date time.Time) bool {
 	holiday := new(models.Holiday)
-	if err := database.DB.Where("holiday_date = ?", date.Format("2006-01-02")).First(holiday).Error; err != nil {
-		return false
-	}
-	return true
+	database.DB.Where("holiday_date = ?", date.Format("2006-01-02")).First(&holiday)
+	return holiday.ID != 0
 }
 
 // GetTaskAssignment handles retrieving a task assignment by ID
@@ -111,24 +112,27 @@ func isHoliday(date time.Time) bool {
 //	@Accept			json
 //	@Produce		json
 //
-// @Security ApiKeyAuth
-// @Param token header string true "API Key"
+//	@Security		ApiKeyAuth
+//	@Param			token	header		string					true	"API Key"
 //
-//	@Param			id	path		int						true	"Task Assignment ID"
-//	@Success		200	{object}	models.TaskAssignment	"Task assignment retrieved successfully"
-//	@Failure		400	{object}	string					"Invalid request payload"
-//	@Failure		404	{object}	string					"Task assignment not found"
+//	@Param			id		path		int						true	"Task Assignment ID"
+//	@Success		200		{object}	models.TaskAssignment	"Task assignment retrieved successfully"
+//	@Failure		400		{object}	string					"Invalid request payload"
+//	@Failure		404		{object}	string					"Task assignment not found"
 //	@Router			/api/v2/taskAssignment/{id} [get]
 func GetTaskAssignment() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		taskAssignment := new(models.TaskAssignment)
-		if err := json.Unmarshal(c.Body(), &taskAssignment); err != nil {
+		type body struct {
+			ID int
+		}
+		b := new(body)
+		if err := json.Unmarshal(c.Body(), &b); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
 		var newTaskAssignment models.TaskAssignment
-		database.DB.First(&newTaskAssignment, taskAssignment.ID)
+		database.DB.Where("id=?", b.ID).First(&newTaskAssignment)
 		if newTaskAssignment.ID == 0 {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task Assignment not found"})
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task Assignment ID not found"})
 		}
 		return c.Status(fiber.StatusOK).JSON(newTaskAssignment)
 	}
@@ -142,12 +146,11 @@ func GetTaskAssignment() fiber.Handler {
 //	@Accept			json
 //	@Produce		json
 //
-// @Security ApiKeyAuth
-// @Param token header string true "API Key"
+//	@Security		ApiKeyAuth
+//	@Param			token			header		string					true	"API Key"
 //
-//	@Param			id				path		int						true	"Task Assignment ID"
 //	@Param			taskAssignment	body		models.TaskAssignment	true	"Updated task assignment details"
-//	@Success		200				{object}	models.TaskAssignment	"Task assignment updated successfully"
+//	@Success		200				{object}	string					"Task assignment updated successfully"
 //	@Failure		400				{object}	string					"Invalid request payload"
 //	@Failure		404				{object}	string					"Username doesn't exist / Task not found / Task assignment not found"
 //	@Router			/api/v2/taskAssignment/{id} [put]
@@ -157,21 +160,27 @@ func UpdateTaskAssignment() fiber.Handler {
 		if err := json.Unmarshal(c.Body(), &taskAssignment); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
+		var existingTaskAssignment models.TaskAssignment
+		database.DB.Where("id=?", taskAssignment.ID).First(&existingTaskAssignment)
+		if existingTaskAssignment.ID == 0 {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task Assignment ID not found"})
+		}
+
 		var existingUser models.User
-		database.DB.First(&existingUser, "username = ?", taskAssignment.Username)
+		database.DB.Where("username=?", taskAssignment.Username).First(&existingUser)
 		if len(existingUser.Username) == 0 {
-			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Username doesn't exists"})
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Username doesn't exists"})
 		}
 
 		var existingTask models.Task
-		database.DB.First(&existingTask, taskAssignment.TaskID)
+		database.DB.Where("id=?", taskAssignment.TaskID).First(&existingTask)
 		if existingTask.ID == 0 {
-			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Task not found"})
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task ID not found"})
 		}
 
 		var checkAlreadyAssigned models.TaskAssignment
-		database.DB.First(&checkAlreadyAssigned, taskAssignment.TaskID)
-		if checkAlreadyAssigned.ID != 0 {
+		database.DB.Where("task_id=?", taskAssignment.TaskID).First(&checkAlreadyAssigned)
+		if checkAlreadyAssigned.ID != 0 && checkAlreadyAssigned.ID != taskAssignment.ID {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task is already assigned to somebody"})
 		}
 
@@ -181,18 +190,12 @@ func UpdateTaskAssignment() fiber.Handler {
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid date time format"})
 		}
-		result := calculateEndDate(startDate, estimatedHours)
+		result := CalculateEndDate(startDate, estimatedHours)
 		taskAssignment.Start_Date = startDate.Format("2006-01-02 3:04 PM")
 		taskAssignment.End_Date = result.Format("2006-01-02 3:04 PM")
 
-		var existingTaskAssignment models.TaskAssignment
-		database.DB.First(&existingTaskAssignment, taskAssignment.ID)
-		if existingTaskAssignment.ID == 0 {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task Assignment not found"})
-		}
-
 		database.DB.Model(&existingTaskAssignment).Updates(taskAssignment)
-		return c.Status(fiber.StatusOK).JSON(existingTaskAssignment)
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Task Assignment Updated successfully"})
 	}
 }
 
@@ -204,25 +207,28 @@ func UpdateTaskAssignment() fiber.Handler {
 //	@Accept			json
 //	@Produce		json
 //
-// @Security ApiKeyAuth
-// @Param token header string true "API Key"
+//	@Security		ApiKeyAuth
+//	@Param			token	header		string	true	"API Key"
 //
-//	@Param			id	path		int		true	"Task Assignment ID"
-//	@Success		200	{object}	string	"Task assignment deleted successfully"
-//	@Failure		400	{object}	string	"Invalid request payload"
-//	@Failure		404	{object}	string	"Task assignment not found"
+//	@Param			id		path		int		true	"Task Assignment ID"
+//	@Success		200		{object}	string	"Task assignment deleted successfully"
+//	@Failure		400		{object}	string	"Invalid request payload"
+//	@Failure		404		{object}	string	"Task assignment not found"
 //	@Router			/api/v2/taskAssignment/{id} [delete]
 func DeleteTaskAssignment() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		taskAssignment := new(models.TaskAssignment)
-		if err := json.Unmarshal(c.Body(), &taskAssignment); err != nil {
+		type body struct {
+			ID int
+		}
+		b := new(body)
+		if err := json.Unmarshal(c.Body(), &b); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
 
 		var existingTaskAssignment models.TaskAssignment
-		database.DB.First(&existingTaskAssignment, taskAssignment.ID)
+		database.DB.Where("id=?", b.ID).First(&existingTaskAssignment)
 		if existingTaskAssignment.ID == 0 {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task Assignment not found"})
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Task Assignment id not found"})
 		}
 
 		database.DB.Delete(&existingTaskAssignment)

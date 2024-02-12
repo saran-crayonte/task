@@ -2,6 +2,7 @@ package holiday
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/saran-crayonte/task/database"
@@ -16,11 +17,11 @@ import (
 //	@Accept			json
 //	@Produce		json
 //
-// @Security ApiKeyAuth
-// @Param token header string true "API Key"
+//	@Security		ApiKeyAuth
+//	@Param			token	header		string			true	"API Key"
 //
 //	@Param			holiday	body		models.Holiday	true	"Holiday details"
-//	@Success		201		{object}	models.Holiday	"Holiday created successfully"
+//	@Success		201		{object}	string			"Holiday created successfully"
 //	@Failure		400		{object}	string			"Invalid request payload"
 //	@Failure		404		{object}	string			"Holiday already defined"
 //	@Router			/api/v2/holiday [post]
@@ -30,13 +31,18 @@ func CreateHoliday() fiber.Handler {
 		if err := json.Unmarshal(c.Body(), &holiday); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
+		layout := "2006-01-02"
+		_, err := time.Parse(layout, holiday.HolidayDate)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid date time format"})
+		}
 		var newHoliday models.Holiday
-		database.DB.First(&newHoliday, holiday.HolidayDate)
+		database.DB.Where("holiday_date=?", holiday.HolidayDate).First(&newHoliday)
 		if newHoliday.ID != 0 {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Holiday already defined"})
 		}
 		database.DB.Create(&holiday)
-		return c.Status(fiber.StatusCreated).JSON(holiday)
+		return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Holiday created successfully"})
 	}
 }
 
@@ -48,22 +54,25 @@ func CreateHoliday() fiber.Handler {
 //	@Accept			json
 //	@Produce		json
 //
-// @Security ApiKeyAuth
-// @Param token header string true "API Key"
+//	@Security		ApiKeyAuth
+//	@Param			token	header		string			true	"API Key"
 //
-//	@Param			id	path		int				true	"Holiday ID"
-//	@Success		200	{object}	models.Holiday	"Holiday retrieved successfully"
-//	@Failure		400	{object}	string			"Invalid request payload"
-//	@Failure		404	{object}	string			"Holiday not found"
+//	@Param			id		path		int				true	"Holiday ID"
+//	@Success		200		{object}	models.Holiday	"Holiday retrieved successfully"
+//	@Failure		400		{object}	string			"Invalid request payload"
+//	@Failure		404		{object}	string			"Holiday not found"
 //	@Router			/api/v2/holiday/{id} [get]
 func GetHoliday() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		holiday := new(models.Holiday)
-		if err := json.Unmarshal(c.Body(), &holiday); err != nil {
+		type body struct {
+			ID int
+		}
+		b := new(body)
+		if err := json.Unmarshal(c.Body(), &b); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
 		var newHoliday models.Holiday
-		database.DB.First(&newHoliday, holiday.ID)
+		database.DB.Where("id=?", b.ID).First(&newHoliday)
 		if newHoliday.ID == 0 {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Holiday not found"})
 		}
@@ -79,12 +88,11 @@ func GetHoliday() fiber.Handler {
 //	@Accept			json
 //	@Produce		json
 //
-// @Security ApiKeyAuth
-// @Param token header string true "API Key"
+//	@Security		ApiKeyAuth
+//	@Param			token	header		string			true	"API Key"
 //
-//	@Param			id		path		int				true	"Holiday ID"
 //	@Param			holiday	body		models.Holiday	true	"Updated holiday details"
-//	@Success		200		{object}	models.Holiday	"Holiday updated successfully"
+//	@Success		200		{object}	string			"Holiday updated successfully"
 //	@Failure		400		{object}	string			"Invalid request payload"
 //	@Failure		404		{object}	string			"Holiday not found"
 //	@Router			/api/v2/holiday/{id} [put]
@@ -95,12 +103,22 @@ func UpdateHoliday() fiber.Handler {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
 		var newHoliday models.Holiday
-		database.DB.First(&newHoliday, holiday.ID)
+		database.DB.Where("id=?", holiday.ID).First(&newHoliday)
 		if newHoliday.ID == 0 {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Holiday not found"})
 		}
+		layout := "2006-01-02"
+		_, err := time.Parse(layout, holiday.HolidayDate)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid date time format"})
+		}
+		var existingHoliday models.Holiday
+		database.DB.Where("holiday_date=?", holiday.HolidayDate).First(&existingHoliday)
+		if existingHoliday.ID != 0 {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Holiday already defined"})
+		}
 		database.DB.Model(&newHoliday).Updates(holiday)
-		return c.Status(fiber.StatusOK).JSON(newHoliday)
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Holiday Updated Successfully"})
 	}
 }
 
@@ -112,22 +130,25 @@ func UpdateHoliday() fiber.Handler {
 //	@Accept			json
 //	@Produce		json
 //
-// @Security ApiKeyAuth
-// @Param token header string true "API Key"
+//	@Security		ApiKeyAuth
+//	@Param			token	header		string	true	"API Key"
 //
-//	@Param			id	path		int		true	"Holiday ID"
-//	@Success		200	{object}	string	"Holiday deleted successfully"
-//	@Failure		400	{object}	string	"Invalid request payload"
-//	@Failure		404	{object}	string	"Holiday not found"
+//	@Param			id		path		int		true	"Holiday ID"
+//	@Success		200		{object}	string	"Holiday deleted successfully"
+//	@Failure		400		{object}	string	"Invalid request payload"
+//	@Failure		404		{object}	string	"Holiday not found"
 //	@Router			/api/v2/holiday/{id} [delete]
 func DeleteHoliday() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		holiday := new(models.Holiday)
-		if err := json.Unmarshal(c.Body(), &holiday); err != nil {
+		type body struct {
+			ID int
+		}
+		b := new(body)
+		if err := json.Unmarshal(c.Body(), &b); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
 		var newHoliday models.Holiday
-		database.DB.First(&newHoliday, holiday.ID)
+		database.DB.Where("id=?", b.ID).First(&newHoliday)
 		if newHoliday.ID == 0 {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Holiday not found"})
 		}

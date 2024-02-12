@@ -151,7 +151,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Holiday created successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Holiday"
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -250,13 +250,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Holiday ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "Updated holiday details",
                         "name": "holiday",
                         "in": "body",
@@ -270,7 +263,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Holiday updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Holiday"
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -366,11 +359,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Enter username",
-                        "name": "username",
-                        "in": "header",
-                        "required": true
+                        "description": "Refresh user token",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
                     }
                 ],
                 "responses": {
@@ -429,17 +424,11 @@ const docTemplate = `{
                     "201": {
                         "description": "Task created successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Task"
+                            "type": "string"
                         }
                     },
                     "400": {
                         "description": "Invalid request payload",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "409": {
-                        "description": "Task with the same title already exists",
                         "schema": {
                             "type": "string"
                         }
@@ -528,13 +517,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Task ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "Updated task details",
                         "name": "task",
                         "in": "body",
@@ -548,7 +530,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Task updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.Task"
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -660,7 +642,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Task assignment created successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.TaskAssignment"
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -759,13 +741,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "Task Assignment ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "Updated task assignment details",
                         "name": "taskAssignment",
                         "in": "body",
@@ -779,7 +754,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Task assignment updated successfully",
                         "schema": {
-                            "$ref": "#/definitions/models.TaskAssignment"
+                            "type": "string"
                         }
                     },
                     "400": {

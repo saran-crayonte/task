@@ -136,7 +136,7 @@ paths:
         "201":
           description: Holiday created successfully
           schema:
-            $ref: '#/definitions/models.Holiday'
+            type: string
         "400":
           description: Invalid request payload
           schema:
@@ -231,11 +231,6 @@ paths:
         name: token
         required: true
         type: string
-      - description: Holiday ID
-        in: path
-        name: id
-        required: true
-        type: integer
       - description: Updated holiday details
         in: body
         name: holiday
@@ -248,7 +243,7 @@ paths:
         "200":
           description: Holiday updated successfully
           schema:
-            $ref: '#/definitions/models.Holiday'
+            type: string
         "400":
           description: Invalid request payload
           schema:
@@ -271,11 +266,12 @@ paths:
         name: token
         required: true
         type: string
-      - description: Enter username
-        in: header
-        name: username
+      - description: Refresh user token
+        in: body
+        name: user
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/models.User'
       produces:
       - application/json
       responses:
@@ -315,13 +311,9 @@ paths:
         "201":
           description: Task created successfully
           schema:
-            $ref: '#/definitions/models.Task'
+            type: string
         "400":
           description: Invalid request payload
-          schema:
-            type: string
-        "409":
-          description: Task with the same title already exists
           schema:
             type: string
       security:
@@ -410,11 +402,6 @@ paths:
         name: token
         required: true
         type: string
-      - description: Task ID
-        in: path
-        name: id
-        required: true
-        type: integer
       - description: Updated task details
         in: body
         name: task
@@ -427,7 +414,7 @@ paths:
         "200":
           description: Task updated successfully
           schema:
-            $ref: '#/definitions/models.Task'
+            type: string
         "400":
           description: Invalid request payload
           schema:
@@ -464,7 +451,7 @@ paths:
         "201":
           description: Task assignment created successfully
           schema:
-            $ref: '#/definitions/models.TaskAssignment'
+            type: string
         "400":
           description: Invalid request payload
           schema:
@@ -559,11 +546,6 @@ paths:
         name: token
         required: true
         type: string
-      - description: Task Assignment ID
-        in: path
-        name: id
-        required: true
-        type: integer
       - description: Updated task assignment details
         in: body
         name: taskAssignment
@@ -576,7 +558,7 @@ paths:
         "200":
           description: Task assignment updated successfully
           schema:
-            $ref: '#/definitions/models.TaskAssignment'
+            type: string
         "400":
           description: Invalid request payload
           schema:

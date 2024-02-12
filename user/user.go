@@ -31,8 +31,11 @@ func Register() fiber.Handler {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
 
+		if dat.Username == "" || dat.Name == "" || dat.Email == "" || dat.Password == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
+		}
 		var existingUser models.User
-		database.DB.First(&existingUser, "username = ?", dat.Username)
+		database.DB.Where("username = ?", dat.Username).First(&existingUser)
 		if len(existingUser.Username) != 0 {
 			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "this username already exists"})
 		}
@@ -70,44 +73,40 @@ func Register() fiber.Handler {
 //	@Router			/api/user/login [post]
 func Login() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		returnObject := fiber.Map{
-			"status": "",
-			"msg":    "Something went wrong.",
+		type body struct {
+			Username string
+			Password string
 		}
-
-		var formData models.User
-
-		if err := json.Unmarshal(c.Body(), &formData); err != nil {
+		b := new(body)
+		if err := json.Unmarshal(c.Body(), &b); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
+		}
+		if b.Username == "" || b.Password == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
 
 		var user models.User
-
-		database.DB.First(&user, "username = ?", formData.Username)
+		database.DB.Where("username=?", b.Username).First(&user)
 		if len(user.Username) == 0 {
-			returnObject["msg"] = "User not found."
-
-			return c.Status(fiber.StatusNotFound).JSON(returnObject)
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Username not found"})
 		}
 
-		err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(formData.Password))
-
+		err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(b.Password))
 		if err != nil {
-			returnObject["msg"] = "Password doesnt match"
-			return c.Status(fiber.StatusUnauthorized).JSON(returnObject)
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid Password"})
 		}
 
 		token, err := GenerateToken(user)
 		if err != nil {
-			returnObject["msg"] = "Token creation error."
-			return c.Status(fiber.StatusUnauthorized).JSON(returnObject)
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Token creation error"})
 		}
 
-		returnObject["token"] = token
-		returnObject["user"] = user
-		returnObject["status"] = "OK"
-		returnObject["msg"] = "User authenticated"
-		return c.Status(fiber.StatusAccepted).JSON(returnObject)
+		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+			"token":   token,
+			"user":    user,
+			"status":  "OK",
+			"message": "User Authenticated",
+		})
 	}
 }
 
@@ -119,8 +118,8 @@ func Login() fiber.Handler {
 //	@Accept			json
 //	@Produce		json
 //
-// @Security ApiKeyAuth
-// @Param token header string true "API Key"
+//	@Security		ApiKeyAuth
+//	@Param			token	header		string		true	"API Key"
 //
 //	@Param			user	body		models.User	true	"Update Password Request"
 //	@Success		202		{object}	string		"Password updated successfully"
@@ -136,27 +135,35 @@ func UpdatePassword() fiber.Handler {
 			return fiber.ErrUnauthorized
 		}
 
-		var user models.User
-		if err := json.Unmarshal(c.Body(), &user); err != nil {
+		type body struct {
+			Username string
+			Password string
+		}
+		b := new(body)
+		if err := json.Unmarshal(c.Body(), &b); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
-		if username != user.Username {
+		if b.Username == "" || b.Password == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
+		}
+
+		if username != b.Username {
 			return fiber.ErrUnauthorized
 		}
 
 		var existingUser models.User
-		database.DB.First(&existingUser, "username = ?", user.Username)
+		database.DB.Where("username=?", b.Username).First(&existingUser)
 		if len(existingUser.Username) == 0 {
 			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Username doesn't exists"})
 		}
 
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(b.Password), bcrypt.DefaultCost)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "hashing failed"})
 		}
 
-		user.Password = string(hashedPassword)
-		database.DB.Model(&existingUser).Updates(user)
+		b.Password = string(hashedPassword)
+		database.DB.Model(&existingUser).Updates(b)
 
 		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
 			"message": "Password updated successfully",
@@ -169,46 +176,60 @@ func UpdatePassword() fiber.Handler {
 //	@Summary		Delete user account
 //	@Description	Deletes the account of the authenticated user
 //	@Tags			User Management
-//	@Produce	json
+//	@Produce		json
 //
-// @Security ApiKeyAuth
-// @Param token header string true "API Key"
+//	@Security		ApiKeyAuth
+//	@Param			token	header		string		true	"API Key"
 //
-//	@Param		user	body		models.User	true	"User deletion request"
-//	@Success	200		{object}	string		"User deleted successfully"
-//	@Failure	400		{object}	string		"Invalid request payload"
-//	@Failure	401		{object}	string		"Unauthorized"
-//	@Failure	404		{object}	string		"Username doesn't exist"
-//	@Failure	500		{object}	string		"Internal Server Error"
-//	@Router		/api/v2/user [delete]
+//	@Param			user	body		models.User	true	"User deletion request"
+//	@Success		200		{object}	string		"User deleted successfully"
+//	@Failure		400		{object}	string		"Invalid request payload"
+//	@Failure		401		{object}	string		"Unauthorized"
+//	@Failure		404		{object}	string		"Username doesn't exist"
+//	@Failure		500		{object}	string		"Internal Server Error"
+//	@Router			/api/v2/user [delete]
 func DeleteUser() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		username, ok := c.Locals("username").(string)
 		if !ok {
 			return fiber.ErrUnauthorized
 		}
-
-		var user models.User
-		if err := json.Unmarshal(c.Body(), &user); err != nil {
+		type body struct {
+			Username string
+			Password string
+		}
+		b := new(body)
+		if err := json.Unmarshal(c.Body(), &b); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
-		if username != user.Username {
+		if b.Username == "" || b.Password == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
+		}
+
+		if username != b.Username {
 			return fiber.ErrUnauthorized
 		}
+
 		var existingUser models.User
-		database.DB.First(&existingUser, "username = ?", user.Username)
+		database.DB.Where("username=?", b.Username).First(&existingUser)
 		if len(existingUser.Username) == 0 {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Username doesn't exists"})
 		}
-		err := bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(user.Password))
+
+		err := bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(b.Password))
 		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid Passward"})
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid Password"})
 		}
+		deleteInTaskAssignment(b.Username)
 		database.DB.Delete(&existingUser)
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"message": "User deleted successfully",
 		})
 	}
+}
+func deleteInTaskAssignment(username string) {
+	taskAssignment := new(models.TaskAssignment)
+	database.DB.Where("username=?", username).Delete(&taskAssignment)
 }
 
 type CustomClaims struct {
@@ -234,7 +255,6 @@ func GenerateToken(user models.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	t, err := token.SignedString([]byte(secret))
-
 	if err != nil {
 		log.Println("Error in token signing.", err)
 		return "", err
@@ -292,55 +312,50 @@ func Authenticate() fiber.Handler {
 //	@Description	Refreshes the authentication token
 //	@Tags			User Management
 //
-// @Security ApiKeyAuth
-// @Param token header string true "API Key"
-// @Param username header string true "Enter username"
+//	@Security		ApiKeyAuth
+//	@Param			token	header	string	true	"API Key"
 //
 //	@Produce		json
-//	@Success		200	{object}	models.User	"Token refreshed successfully"
-//	@Failure		401	{object}	string		"Unauthorized"
+//	@Param			user	body		models.User	true	"Refresh user token"
+//	@Success		200		{object}	models.User	"Token refreshed successfully"
+//	@Failure		401		{object}	string		"Unauthorized"
 //	@Router			/api/v2/refreshToken [get]
 func RefreshToken() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		returnObject := fiber.Map{
-			"status": "OK",
-			"msg":    "Refresh Token route",
+		type body struct {
+			Username string
 		}
-
-		username := c.Get("username")
-		if username == "" {
-			log.Println("Username key not found.")
-
-			returnObject["msg"] = "username not found."
-			return c.Status(fiber.StatusUnauthorized).JSON(returnObject)
+		bodyUser := new(body)
+		if err := json.Unmarshal(c.Body(), &bodyUser); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
+		}
+		if bodyUser.Username == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request payload"})
 		}
 
 		tokenUsername := c.Locals("username")
-		if username != tokenUsername {
+
+		if bodyUser.Username != tokenUsername {
 			log.Println("username and token username mismatch.")
-			returnObject["msg"] = "Invalid username."
-			return c.Status(fiber.StatusUnauthorized).JSON(returnObject)
+
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "username and token username mismatch."})
 		}
 
 		var user models.User
-		database.DB.First(&user, "username = ?", username)
-
+		database.DB.Where("username=?", bodyUser.Username).First(&user)
 		if len(user.Username) == 0 {
-			returnObject["msg"] = "Username not found."
-
-			return c.Status(fiber.StatusBadRequest).JSON(returnObject)
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "username not found."})
 		}
 
 		token, err := GenerateToken(user)
-
 		if err != nil {
-			returnObject["msg"] = "Token creation error."
-			return c.Status(fiber.StatusUnauthorized).JSON(returnObject)
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Token creation error."})
 		}
 
-		returnObject["token"] = token
-		returnObject["user"] = user
-
-		return c.Status(fiber.StatusOK).JSON(returnObject)
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"token":  token,
+			"user":   user,
+			"status": "Ok",
+		})
 	}
 }
